@@ -1,22 +1,14 @@
-var express = require('express');
-var app = express();
+var restify = require('restify');
 
-var redis = require('redis');
-var client = redis.createClient();
+function respond(req, res, next) {
+  res.send('hello ' + req.params.name);
+  next();
+}
 
-client.on('connect', function() {
-    console.log('Redis connected.');
-});
+var server = restify.createServer();
+server.get('/hello/:name', respond);
+server.head('/hello/:name', respond);
 
-app.get('/', function(req, res) {
-	var key = Math.random() * 1000;
-	client.set(key, Math.random() * 1000);
-	client.get(key, function(err, reply) {
-    	res.send(reply);
-	});
-});
-
-var server = app.listen(3000, function () {
-  var port = server.address().port;
-  console.log('Redis test listening on port %s', port);
+server.listen(8080, function() {
+  console.log('%s listening at %s', server.name, server.url);
 });
